@@ -1,0 +1,150 @@
+﻿<html >
+<head>
+    <!-- This block removes scrollbars from the page-->
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+    <canvas id="canvas"></canvas>
+    <div style="display:none;">
+        <img src="money_bag_small.png" id="moneyBagImg" />
+        <img src="background.jpg" id="backgroundImg" />
+        <img src="gameLost.png" id="gameLostImg" />
+        <img src="game_won.png" id="gameWonImg" />
+        <img src="replay_btn.png" id="replayImg" />
+    </div>
+</head>
+<body onclick="proccessClicks(event)">
+  <script src="howler.js"></script>
+    <script>
+        window.onload = init;
+        let canvas;
+        let context;
+        let moneyBagImg, backgroundImg, gameLostImg, gameWonImg, replayImg;
+        let moneyBagX = 0, moneyBagY = 0;
+        let replayX, replayY;
+        const INIT_INTERVAL = 1000;
+        let jumpInterval = INIT_INTERVAL;
+        const INIT_SCORE = 1000;
+        let score = INIT_SCORE;
+        const WIN_SCORE = 5000;
+        let missSound, hitSound, gameOver, backgroundMusic, gameWon;
+        function init() {
+            canvas = document.getElementById("canvas");
+            canvas.width = document.body.clientWidth;
+            canvas.height = document.body.clientHeight;
+            context = canvas.getContext("2d");
+            moneyBagImg = document.getElementById("moneyBagImg");
+            backgroundImg = document.getElementById("backgroundImg");
+            gameLostImg = document.getElementById("gameLostImg");
+            gameWonImg = document.getElementById("gameWonImg");
+            replayImg = document.getElementById("replayImg");
+            replayX = canvas.width - replayImg.width;
+            replayY = canvas.height - replayImg.height ;
+            missSound = new Howl({ src: ['ricochet.wav'] }); 
+            hitSound = new Howl({ src: ['hitSound.wav'] });
+            gameOver = new Howl({ src: ['game_over.wav'] });
+            gameWon = new Howl({ src: ['win_sound.wav'] });
+            backgroundMusic = new Audio("money_song.mp3");
+            backgroundMusic.play();
+            backgroundMusic.loop = true;
+            backgroundMusic.volume = 0.1;
+            respawnMoneyBag();
+            window.requestAnimationFrame(gameLoop);
+        }
+        function gameLoop() {
+            update();
+            draw();
+            window.requestAnimationFrame(gameLoop);
+        }
+        function update() {
+            //moneyBagX -= 5;
+            
+        }
+        function draw() {
+            context.drawImage(backgroundImg, 0, 0, canvas.width, canvas.height);
+            context.drawImage(moneyBagImg, moneyBagX, moneyBagY);
+            if (score >= 1000) {
+                context.fillStyle = "Blue";
+            }
+            else {
+                context.fillStyle = "Red";
+            }
+            context.font = "bold 100px Arial";
+            context.fillText("score: " + score + "/" + WIN_SCORE, 0, 100);
+            if (score <= 0) {
+
+                context.drawImage(gameLostImg, (canvas.width - gameLostImg.width) / 2, (canvas.height - gameLostImg.height) / 2);
+                showCreditAndReplayBtn();
+            }
+            if (score >= WIN_SCORE) {
+                context.drawImage(gameWonImg, (canvas.width - gameWonImg.width) / 2, (canvas.height - gameWonImg.height) / 2);
+                showCreditAndReplayBtn();
+            }
+        }
+        setInterval(function () {
+            jumpInterval -= 3;  
+            
+        }, 1000);
+        function respawnMoneyBag() {
+            if (score > 0 && score < WIN_SCORE) {
+
+                moneyBagX = getRandomArbitrary(0, canvas.width - moneyBagImg.width);
+                moneyBagY = getRandomArbitrary(0, canvas.height - moneyBagImg.height);
+                score -= 25;
+                playFinishGameSoundIfNeeded();
+                
+            }
+            setTimeout(respawnMoneyBag, jumpInterval);
+        }
+        
+        function getRandomArbitrary(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+        function proccessClicks(click) {
+            if (score > 0 && score < WIN_SCORE) {
+
+                if (click.clientX >= moneyBagX && click.clientX < moneyBagX + moneyBagImg.width
+                    && click.clientY >= moneyBagY && click.clientY < moneyBagY + moneyBagImg.height) {
+                    score += 125;
+                    hitSound.play();
+                    playFinishGameSoundIfNeeded();
+                }
+                else {
+                    score -= 100;
+                    missSound.play();
+                    playFinishGameSoundIfNeeded();
+                    
+                }
+            }
+            else {
+                if (click.clientX >= replayX && click.clientX <= replayX + replayImg.width
+                    && click.clientY >= replayY && click.clientY <= replayY + replayImg.height) {
+                    score = INIT_SCORE;
+                    jumpInterval = INIT_INTERVAL;
+                }
+            }
+            
+        }
+        function playFinishGameSoundIfNeeded() {
+            if (score <= 0) {
+                gameOver.play();
+            }
+            if (score >= WIN_SCORE) {
+                gameWon.play();
+            }
+        }
+        function showCreditAndReplayBtn() {
+            context.fillStyle = "Blue";
+            context.font = "bold 100px Arial";
+            context.fillText("Coded by Quyen", 0, canvas.height);
+            context.drawImage(replayImg, replayX, replayY);
+            
+        }       
+    </script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+
+<html >
+<head>
+    <!-- This block removes scrollbars from the page-->
+    <style>
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+    </style>
+    <canvas id="canvas"></canvas>
+    <div style="display:none;">
+        <img src="money_bag_small.png" id="moneyBagImg" />
+    </div>
+</head>
+<body>
+    <script>
+        window.onload = init;
+        let canvas;
+        let context;
+        let moneyBagImg;
+
+        function init() {
+            canvas = document.getElementById("canvas");
+            canvas.width = document.body.clientWidth;
+            canvas.height = document.body.clientHeight;
+            context = canvas.getContext("2d");
+            moneyBagImg = document.getElementById("moneyBagImg");
+            window.requestAnimationFrame(gameLoop);
+        }
+        function gameLoop() {
+            update();
+            draw();
+            window.requestAnimationFrame(gameLoop);
+        }
+        function draw() {
+            context.drawImage(moneyBagImg, 0, 0, canvas.width, canvas.height);
+        }
+    </script>
+</body>
+</html>
